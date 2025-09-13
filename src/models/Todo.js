@@ -122,3 +122,5 @@ todoSchema.methods.changePriority = function(newPriority) {
 
 module.exports = mongoose.model('Todo', todoSchema);
 
+
+

@@ -7,13 +7,12 @@ require('dotenv').config();
 
 // 라우트 import
 const todoRoutes = require('./routers/todoRoutes');
-const config = require('./config');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// MongoDB 연결 설정 - MONGO_URL 환경변수 우선, config.js 백업, 로컬 기본값
-const MONGODB_URI = process.env.MONGO_URL || config.mongo_url || 'mongodb://localhost:27017/todo-backend';
+// MongoDB 연결 설정 - .env 파일의 MONGO_URL 사용
+const MONGODB_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/todo-backend';
 
 // 미들웨어 설정
 app.use(helmet()); // 보안 헤더 설정
