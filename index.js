@@ -9,7 +9,7 @@ require('dotenv').config();
 const todoRoutes = require('./routers/todoRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // MongoDB 연결 설정 - .env 파일의 MONGO_URL 사용
 const MONGODB_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/todo-backend';
