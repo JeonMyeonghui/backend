@@ -36,14 +36,6 @@ const todoSchema = new mongoose.Schema({
     trim: true,
     maxlength: [20, '태그는 20자를 초과할 수 없습니다.']
   }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
 }, {
   timestamps: true, // createdAt, updatedAt 자동 관리
   versionKey: false // __v 필드 제거
@@ -66,13 +58,7 @@ todoSchema.virtual('daysUntilDue').get(function() {
 // JSON 변환 시 가상 필드 포함
 todoSchema.set('toJSON', { virtuals: true });
 
-// 미들웨어: 업데이트 시 updatedAt 자동 갱신
-todoSchema.pre('save', function(next) {
-  if (this.isModified() && !this.isNew) {
-    this.updatedAt = new Date();
-  }
-  next();
-});
+// timestamps: true가 자동으로 updatedAt을 관리하므로 미들웨어 제거
 
 // 정적 메서드: 완료된 할 일 조회
 todoSchema.statics.findCompleted = function() {
@@ -102,25 +88,25 @@ todoSchema.statics.findDueSoon = function() {
 // 인스턴스 메서드: 할 일 완료 처리
 todoSchema.methods.markAsCompleted = function() {
   this.completed = true;
-  this.updatedAt = new Date();
-  return this.save();
+  return this.save(); // timestamps: true가 자동으로 updatedAt 관리
 };
 
 // 인스턴스 메서드: 할 일 미완료 처리
 todoSchema.methods.markAsPending = function() {
   this.completed = false;
-  this.updatedAt = new Date();
-  return this.save();
+  return this.save(); // timestamps: true가 자동으로 updatedAt 관리
 };
 
 // 인스턴스 메서드: 우선순위 변경
 todoSchema.methods.changePriority = function(newPriority) {
   this.priority = newPriority;
-  this.updatedAt = new Date();
-  return this.save();
+  return this.save(); // timestamps: true가 자동으로 updatedAt 관리
 };
 
 module.exports = mongoose.model('Todo', todoSchema);
+
+
+
 
 
 

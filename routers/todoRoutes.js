@@ -102,6 +102,58 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 통계 정보 조회
+router.get('/stats/overview', async (req, res) => {
+  try {
+    const stats = await Todo.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          completed: { $sum: { $cond: ['$completed', 1, 0] } },
+          pending: { $sum: { $cond: ['$completed', 0, 1] } },
+          highPriority: { $sum: { $cond: [{ $eq: ['$priority', 'high'] }, 1, 0] } },
+          mediumPriority: { $sum: { $cond: [{ $eq: ['$priority', 'medium'] }, 1, 0] } },
+          lowPriority: { $sum: { $cond: [{ $eq: ['$priority', 'low'] }, 1, 0] } },
+          overdue: {
+            $sum: {
+              $cond: [
+                { $and: [{ $lt: ['$dueDate', new Date()] }, { $eq: ['$completed', false] }] },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
+    const result = stats[0] || {
+      total: 0,
+      completed: 0,
+      pending: 0,
+      highPriority: 0,
+      mediumPriority: 0,
+      lowPriority: 0,
+      overdue: 0
+    };
+
+    // 완료율 계산
+    result.completionRate = result.total > 0 ? Math.round((result.completed / result.total) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('통계 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '통계 정보를 가져오는 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 // 특정 할 일 조회
 router.get('/:id', async (req, res) => {
   try {
@@ -344,59 +396,10 @@ router.delete('/', async (req, res) => {
   }
 });
 
-// 통계 정보 조회
-router.get('/stats/overview', async (req, res) => {
-  try {
-    const stats = await Todo.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          completed: { $sum: { $cond: ['$completed', 1, 0] } },
-          pending: { $sum: { $cond: ['$completed', 0, 1] } },
-          highPriority: { $sum: { $cond: [{ $eq: ['$priority', 'high'] }, 1, 0] } },
-          mediumPriority: { $sum: { $cond: [{ $eq: ['$priority', 'medium'] }, 1, 0] } },
-          lowPriority: { $sum: { $cond: [{ $eq: ['$priority', 'low'] }, 1, 0] } },
-          overdue: {
-            $sum: {
-              $cond: [
-                { $and: [{ $lt: ['$dueDate', new Date()] }, { $eq: ['$completed', false] }] },
-                1,
-                0
-              ]
-            }
-          }
-        }
-      }
-    ]);
-
-    const result = stats[0] || {
-      total: 0,
-      completed: 0,
-      pending: 0,
-      highPriority: 0,
-      mediumPriority: 0,
-      lowPriority: 0,
-      overdue: 0
-    };
-
-    // 완료율 계산
-    result.completionRate = result.total > 0 ? Math.round((result.completed / result.total) * 100) : 0;
-
-    res.json({
-      success: true,
-      data: result
-    });
-  } catch (error) {
-    console.error('통계 조회 오류:', error);
-    res.status(500).json({
-      success: false,
-      error: '통계 정보를 가져오는 중 오류가 발생했습니다.'
-    });
-  }
-});
-
 module.exports = router;
+
+
+
 
 
 
